@@ -1,0 +1,100 @@
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using WebAPISolution.Models;
+using WebAPISolution.Contexts;
+
+[Route("api/[controller]")]
+// api/estudiantes
+[ApiController]
+public class EstudiantesController : ControllerBase
+{
+    private readonly ApplicationDbContext _context;
+    public EstudiantesController(ApplicationDbContext context)
+    {
+        _context = context;
+    }
+
+    // GET: api/Estudiante
+    [HttpGet]
+    public async Task<ActionResult<IEnumerable<Estudiante>>> GetEstudiante()
+    {
+        return await _context.Estudiante.ToListAsync();
+    }
+
+    // GET: api/Estudiante/5
+    [HttpGet("{estuadianteid}")]
+    public async Task<ActionResult<Estudiante>> GetEstudiante(int estuadianteid)
+    {
+        var estudiante = await _context.Estudiante.FindAsync(estuadianteid);
+
+        if (estudiante == null)
+        {
+            return NotFound();
+        }
+
+        return estudiante;
+    }
+
+    // PUT: api/Estudiante/5
+    // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+    [HttpPut("{estuadianteid}")]
+    public async Task<IActionResult> PutEstudiante(int? estuadianteid, Estudiante estudiante)
+    {
+        if (estuadianteid != estudiante.EstuadianteId)
+        {
+            return BadRequest();
+        }
+
+        _context.Entry(estudiante).State = EntityState.Modified;
+
+        try
+        {
+            await _context.SaveChangesAsync();
+        }
+        catch (DbUpdateConcurrencyException)
+        {
+            if (!EstudianteExists(estuadianteid))
+            {
+                return NotFound();
+            }
+            else
+            {
+                throw;
+            }
+        }
+
+        return NoContent();
+    }
+
+    // POST: api/Estudiante
+    // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+    [HttpPost]
+    public async Task<ActionResult<Estudiante>> PostEstudiante(Estudiante estudiante)
+    {
+        _context.Estudiante.Add(estudiante);
+        await _context.SaveChangesAsync();
+
+        return CreatedAtAction("GetEstudiante", new { estuadianteid = estudiante.EstuadianteId }, estudiante);
+    }
+
+    // DELETE: api/Estudiante/5
+    [HttpDelete("{estuadianteid}")]
+    public async Task<IActionResult> DeleteEstudiante(int? estuadianteid)
+    {
+        var estudiante = await _context.Estudiante.FindAsync(estuadianteid);
+        if (estudiante == null)
+        {
+            return NotFound();
+        }
+
+        _context.Estudiante.Remove(estudiante);
+        await _context.SaveChangesAsync();
+
+        return NoContent();
+    }
+
+    private bool EstudianteExists(int? estuadianteid)
+    {
+        return _context.Estudiante.Any(e => e.EstuadianteId == estuadianteid);
+    }
+}
